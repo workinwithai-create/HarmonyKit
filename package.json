@@ -1,0 +1,8 @@
+{
+  "name": "harmonykit",
+  "version": "1.0.0",
+  "private": true,
+  "description": "HarmonyKit: singable harmony parts written for your lead melody, learned on real choir samples, sung and scored. WorkinWithAI.",
+  "scripts": { "build": "rm -rf dist && mkdir -p dist && cp index.html app.js styles.css dist/ && cp -r public/samples dist/samples" },
+  "license": "UNLICENSED"
+}

@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HarmonyKit: harmony parts written for your melody, learned and sung</title>
+<meta name="description" content="Can't figure out the harmonies? Bring your lead melody (sing it, play it on a MIDI keyboard or import a voice memo) and your chords. HarmonyKit writes singable harmony parts (3rd above, low part, country 6ths, ooh pads), plays each one on real choir samples so you can learn it, then scores every harmony take you sing. Exports WAV, MIDI (one track per part), a harmony sheet and stems.">
+<link rel="stylesheet" href="styles.css"></head>
+<body>
+<div id="tap" class="tap"><button id="tapBtn">Tap to start audio<small>HarmonyKit plays real recorded voices and instruments (FluidR3 choir aahs + voice oohs, piano, strings, bass, acoustic drums). Wear headphones when you sing a part so the guide stays out of the mic.</small></button></div>
+<header><div class="brand"><b>HarmonyKit</b><span>by WorkinWithAI</span></div>
+<p class="pitch">Can't figure out the harmony? <b>Bring your lead and your chords.</b> HarmonyKit writes singable harmony parts for it, plays each one alone on real choir samples so you can learn it, then <b>scores every take you sing</b>, bar by bar.</p></header>
+<p id="ios" class="hint ios" hidden>iPhone/iPad: flip the silent switch off (or use headphones). iOS mutes web audio when the ringer is silenced. Exports open the share sheet: pick "Save to Files".</p>
+<main>
+<section class="card song"><h2>Your song <small>Your BPM, key and chords always come first</small></h2>
+  <div class="row">
+    <label>BPM <input id="bpm" type="number" min="60" max="180" step="1"></label>
+    <label>Key <select id="key"></select> <select id="mode"><option value="major">major</option><option value="minor">minor</option></select></label>
+    <label>Length <select id="bars"><option value="4">4 bars</option><option value="8">8 bars</option><option value="16">16 bars</option></select></label>
+    <label>Band <select id="recipe"></select> <button id="presetBpm" class="mini" title="Use this band's preset tempo">preset tempo</button></label>
+  </div>
+  <div class="row"><label class="grow">Chords, one per bar <input id="chords" spellcheck="false" placeholder="C G Am F"></label><button id="chordSug" class="mini">Suggest from my lead</button></div>
+  <p class="hint" id="chordNote"></p>
+  <p class="hint"><span id="recipeNote"></span></p><p class="hint" id="keySug"></p>
+</section>
+
+<section class="card melody"><h2>1 · Your lead <small>every full pass of the loop becomes a take</small></h2>
+  <div class="row"><button id="rec" class="big recb">● Record lead takes</button>
+    <label>While recording, hear <select id="recBed"><option value="click">click only</option><option value="drums">drums + click</option><option value="band">the band + click</option></select></label>
+    <label>Snap notes to <select id="quant"><option value="16">16ths</option><option value="8">8ths</option><option value="0">off (as sung)</option></select></label>
+    <button id="imp">Import voice memo or MIDI file</button><input id="impFile" type="file" accept=".mid,.midi,audio/*,.wav,.mp3,.m4a,.aac,.ogg,.flac" multiple hidden>
+    <button id="demoBtn" class="mini">Load demo lead</button></div>
+  <div class="cols">
+    <div><h3>Sing (mic)</h3>
+      <div class="row"><button id="micBtn">Turn mic on</button><label>Input <select id="audioIn"></select></label><label><input id="monitor" type="checkbox"> hear myself</label></div>
+      <div class="meter big"><i id="meterBar"></i></div><p class="hint" id="micState"></p>
+      <label class="hint">Latency fix <input id="lat" type="range" min="-80" max="80" step="1"> <span id="lat_v"></span></label></div>
+    <div><h3>Play (MIDI keyboard)</h3>
+      <div class="row"><label>MIDI in <select id="midiIn"></select></label><label>Sound <select id="liveInst"></select></label></div>
+      <p class="hint" id="midiNote"></p><label class="hint"><input id="recKeys" type="checkbox"> Record on-screen keys too</label></div>
+  </div>
+  <div id="takes" class="takes"></div>
+  <details class="kbdwrap"><summary>On-screen keys (fallback when no MIDI keyboard; computer keys A W S E D F T G Y H U J K)</summary>
+    <div class="row"><button id="octDn" class="mini">oct −</button><span id="oct_v"></span><button id="octUp" class="mini">oct +</button></div><div id="kbd" class="kbd"></div></details>
+</section>
+
+<section class="card harmony"><h2>2 · Harmony parts <small>written for your lead · click a note to move or lock it · 🎧 learn one part · ● sing it and get scored</small></h2>
+  <div id="stacks" class="styles"></div>
+  <div class="row"><label><input id="recGuide" type="checkbox"> Hear the part's guide while I sing it (untick to test yourself)</label><button id="resetEdits" class="mini">Clear all note edits</button></div>
+  <div class="lane"><div id="barcells" class="barcells"></div></div>
+  <div id="parts" class="parts"></div>
+</section>
+
+<section class="card listen"><h2>3 · Listen</h2>
+  <div class="row"><button id="play" class="big">▶ Play loop</button><span id="pos" class="pos"></span></div>
+  <div class="row"><span class="ab"><button id="abA">A · Thin (lead, no harmonies)</button><button id="abB">B · Need (lead + harmony stack)</button></span><span id="match" class="hint"></span></div>
+  <p class="hint" id="learnNote"></p>
+  <div class="row"><label>Lead sound <select id="melInst"></select></label><label>Lead from <select id="melSrc"><option value="inst">notes on the instrument</option><option value="voice">my recorded voice</option></select></label>
+    <label><input id="click" type="checkbox"> click (cross-stick sample)</label></div><p class="hint" id="melSrcNote"></p>
+  <div id="mix" class="mix"></div>
+  <div class="row"><label>Audio output <select id="audioOut"></select></label><label>MIDI out <select id="midiOut"></select></label></div><p class="hint" id="audioOutNote"></p>
+  <p class="status" id="status">Tap to start audio.</p><p id="load" class="load"></p>
+</section>
+
+<section class="card export"><h2>4 · Export <small>exact length, downbeat at sample 0</small></h2>
+  <div class="row"><button id="wav">Export WAV</button><button id="mid">Export MIDI</button><button id="sheet">Export harmony sheet (.txt)</button><button id="stems">Export stems ZIP</button>
+    <label><input id="expLead" type="checkbox"> include the lead in the WAV</label></div>
+  <p class="hint" id="expNote"></p><progress id="expProg" max="1" hidden></progress><p id="expMsg" class="expmsg"></p><p id="saveRow" class="saverow" hidden></p>
+  <div class="license row"><button id="buy" disabled>Checkout opening soon</button><input id="licKey" placeholder="License key" spellcheck="false"><button id="licBtn" class="mini">Activate</button><span id="licState" class="hint"></span></div>
+</section>
+</main>
+<footer><p>HarmonyKit plays only real recorded samples: FluidR3 GM (MIT) choir aahs, voice oohs and band instruments pinned to commit 044fab8, and the CC0 Virtuosity acoustic kit, bundled here. The click is the kit's real cross-stick sample. Demo lead: "Ode to Joy" (Beethoven, public domain). Your takes stay in this browser. <a href="samples/CREDITS.md">Credits</a> · WorkinWithAI</p></footer>
+<script src="app.js"></script>
+</body></html>
